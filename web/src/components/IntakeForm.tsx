@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import s from "./app.module.css";
 import f from "./intake.module.css";
-import { MAX_AMOUNT_USD, OUT_OF_SCOPE, SAMPLE_PARTIES, feeFor } from "@/lib/types";
+import { MAX_AMOUNT_USD, SAMPLE_PARTIES, feeFor } from "@/lib/types";
 import { SCENARIOS, scenarioById } from "@/lib/scenarios";
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -42,14 +42,13 @@ export function IntakeForm({
   const [rEmail, setREmail] = useState(firstPeople?.responsibleEmail ?? "");
   const [aName, setAName] = useState(firstPeople?.affectedName ?? "");
   const [aEmail, setAEmail] = useState(firstPeople?.affectedEmail ?? "");
-  const [scope, setScope] = useState<string[]>([]);
   const [draftOn, setDraftOn] = useState<"gmi" | "claude">(ownModel ? "gmi" : "claude");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
   const amountNum = Number(amount);
   const tooBig = amountNum > MAX_AMOUNT_USD;
-  const outside = scope.length > 0 || tooBig;
+  const outside = tooBig;
 
   function pick(id: string) {
     setPicked(id);
@@ -84,7 +83,7 @@ export function IntakeForm({
           responsibleEmail: rEmail,
           affectedName: aName,
           affectedEmail: aEmail,
-          outOfScope: scope,
+          outOfScope: [],
           draftOn,
         }),
       });
@@ -260,25 +259,6 @@ export function IntakeForm({
               </div>
             </section>
 
-            <section className={`${s.panel} ${f.block}`} aria-labelledby="h-scope">
-              <h2 id="h-scope" className={s.panelTitle}>
-                Does any of this apply?
-              </h2>
-              <ul className={f.checks}>
-                {OUT_OF_SCOPE.map((o) => (
-                  <li key={o.id}>
-                    <label className={scope.includes(o.id) ? f.chipOn : undefined}>
-                      <input
-                        type="checkbox"
-                        checked={scope.includes(o.id)}
-                        onChange={(e) => setScope((sc) => (e.target.checked ? [...sc, o.id] : sc.filter((x) => x !== o.id)))}
-                      />
-                      {o.label}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </section>
           </div>
 
           <aside className={f.side}>
