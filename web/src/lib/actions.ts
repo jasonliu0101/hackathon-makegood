@@ -1,4 +1,4 @@
-import { AUTO_RELEASE_DAYS, type CaseFile } from "./types";
+import { AUTO_RELEASE_DAYS, NOTARY, type CaseFile } from "./types";
 
 export type CaseAction =
   | { type: "claim"; reviewer: string; credential: string }
@@ -9,7 +9,9 @@ export type CaseAction =
   | { type: "sign"; party: "responsible" | "affected" }
   | { type: "fund" }
   | { type: "confirm" }
-  | { type: "dispute"; notes: string };
+  | { type: "dispute"; notes: string }
+  | { type: "notary_request"; party: "responsible" | "affected" }
+  | { type: "notarize" };
 
 const now = () => new Date().toISOString();
 
@@ -71,11 +73,31 @@ export function applyAction(c: CaseFile, a: CaseAction): string | null {
       c.hold.releasedAt = now();
       c.stage = "released";
       log(c.affected.name, "Confirmed it is made good. Money released; the release clause is now in effect.");
+      if (c.notary?.notarizedAt) {
+        c.notary.certifiedAt = c.hold.releasedAt;
+        log(NOTARY.name, `Certified the $${c.hold.amountUsd} transfer to ${c.affected.name} against deed ${c.notary.deedNo}.`);
+      }
       return null;
     case "dispute":
       if (c.stage !== "held") return "Only held money can be disputed.";
       c.stage = "disputed";
       log(c.affected.name, `Reported a problem: ${a.notes}`);
       return null;
+    case "notary_request": {
+      if (!["awaiting_funds", "held"].includes(c.stage)) return "Both parties sign before a notary seals it.";
+      if (c.notary) return "A notary is already on this case.";
+      c.notary = { requestedAt: now(), requestedBy: a.party };
+      log(c[a.party].name, `Asked ${NOTARY.name}, a partner notary, to notarise the agreement.`);
+      return null;
+    }
+    case "notarize": {
+      if (!c.notary) return "No notary was asked for.";
+      if (c.notary.notarizedAt) return "Already notarised.";
+      if (!["awaiting_funds", "held"].includes(c.stage)) return "This case can no longer be notarised.";
+      c.notary.notarizedAt = now();
+      c.notary.deedNo = `TPE-${new Date().getFullYear()}-${c.id.replace(/^MG-/, "")}`;
+      log(NOTARY.name, `Checked both IDs, authenticated both signatures and sealed deed ${c.notary.deedNo} with a direct-enforcement clause (Notary Act, Art. 13).`);
+      return null;
+    }
   }
 }

@@ -48,6 +48,17 @@ export type Party = {
   payoutsReady?: boolean;
 };
 
+export type DraftEngine = "claude" | "gmi" | "template";
+
+export type Notarization = {
+  requestedAt: string;
+  requestedBy: "responsible" | "affected";
+  notarizedAt?: string;
+  deedNo?: string;
+  /** Set when the money is released: the notary records the transfer against the deed. */
+  certifiedAt?: string;
+};
+
 export type ChecklistItem = { id: string; label: string; done: boolean };
 
 export type CaseEvent = { at: string; who: string; text: string };
@@ -59,7 +70,11 @@ export type CaseFile = {
   responsible: Party;
   affected: Party;
   agreement: Agreement;
-  draftedBy: "claude" | "template";
+  draftedBy: DraftEngine;
+  /** The model that wrote the draft, e.g. "claude-opus-5-5" or a local model tag. */
+  draftModel?: string;
+  /** Optional notarisation by a partner notary (Taiwan Notary Act): an enforceable deed, and the transfer certified on release. */
+  notary?: Notarization;
   reviewer?: { name: string; credential: string; claimedAt: string; notes?: string };
   checklist: ChecklistItem[];
   /** Payment hold: in production a destination charge into the payee's Stripe connected account with manual payouts. */
@@ -120,12 +135,31 @@ export const AUTO_RELEASE_DAYS = 7;
 /** Sample people for each scenario, so a picked scenario is a complete case. Replace with real parties in production. */
 export type SampleParties = { responsibleName: string; responsibleEmail: string; affectedName: string; affectedEmail: string };
 export const SAMPLE_PARTIES: Record<string, SampleParties> = {
-  "scooter-scrape": { responsibleName: "Kai Lin", responsibleEmail: "kai.lin@example.com", affectedName: "Mei Wu", affectedEmail: "meiwu.tpe@example.com" },
-  mirror: { responsibleName: "Wei Chang", responsibleEmail: "wei.chang@example.com", affectedName: "Yu-ting Huang", affectedEmail: "yuting.h@example.com" },
-  "tipped-over": { responsibleName: "Hao Chen", responsibleEmail: "haochen88@example.com", affectedName: "Jia Lee", affectedEmail: "jia.lee@example.com" },
-  "plant-pot": { responsibleName: "Ting Hsu", responsibleEmail: "ting.hsu@example.com", affectedName: "Ruby Lo", affectedEmail: "ruby.lo@example.com" },
-  fence: { responsibleName: "Dana Ortiz", responsibleEmail: "dana.ortiz@example.com", affectedName: "Sam Park", affectedEmail: "sam.park@example.com" },
+  "scooter-scrape": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+  mirror: { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+  "tipped-over": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+  "plant-pot": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+  fence: { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+};
+
+/**
+ * The demo partner notary. Fee per the Notary Act, Art. 109: NT$1,000 for a deed of NT$200,000 or less.
+ * A deed with a direct-enforcement clause (Art. 13) can be enforced without suing if the money is not paid.
+ */
+export const NOTARY = { name: "J. Liu", office: "Private notary, Taipei District Court", feeTwd: 1000 };
+
+/**
+ * The attorney-certified template every draft fills in. Models only put the parties' words into these clauses.
+ * Sample certification for the demo; replace with the real certifying attorney.
+ */
+export const TEMPLATE = {
+  id: "TW-SR-01",
+  version: "1.2",
+  name: "Small damage settlement and release",
+  certifiedBy: "Atty. Liu J.",
+  bar: "Taipei Bar Association",
+  clauses: ["Parties", "What happened", "What will be done", "Payment hold", "Release", "If it goes wrong", "Signatures"],
 };
 
 /** The demo reviewer. */
-export const REVIEWER = { name: "Lin H.", credential: "Paralegal certificate, CA LDA #4471" };
+export const REVIEWER = { name: "Liu J.", credential: "Paralegal certificate, CA LDA #4471" };

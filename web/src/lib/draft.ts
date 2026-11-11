@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
-import { AgreementSchema, type Agreement, type Intake } from "./types";
+import { draftOnGmi } from "./gmi";
+import { AgreementSchema, TEMPLATE, type Agreement, type DraftEngine, type Intake } from "./types";
 
 const SYSTEM = `You are the drafting engine of MakeGood, a neutral settlement service for small everyday property-damage disputes between two private people (US$50-2,000).
 
@@ -10,14 +11,39 @@ You work as a scrivener, not a lawyer:
 - The agreement is a settlement and mutual release scoped to THIS incident only. The release takes effect only when the payment is confirmed or the repair/replacement is confirmed done.
 - Money moves through a payment hold: the responsible party pays into the hold when both have signed; it is released to the affected party when they confirm, or automatically 7 days after the due date if they say nothing; if the responsible party does not fulfil the obligation by the due date the affected party keeps all their rights.
 - title: just the place, 2-5 words, e.g. "Dunhua South Road".
-- clauses: 5-7 short clauses (Parties, What happened, What will be done, Payment hold, Release, If it goes wrong, Signatures). Each body 1-3 sentences.
-- plainEnglish: 3-5 sentences a teenager would understand, in second person to both parties ("Alex pays...").
+- clauses: fill the attorney-certified template ${TEMPLATE.id} v${TEMPLATE.version}: exactly these 7 clauses, with these headings, in this order: ${TEMPLATE.clauses.join(", ")}. Each body 1-3 sentences. Do not add, drop or rename clauses.
+- plainEnglish: 3-5 sentences a teenager would understand, in second person to both parties ("Jason pays...").
 - flags: concrete gaps a checklist reviewer should look at (missing evidence, vague location, deadline in the past, amount with no quote). Do NOT write advice. Empty array if none.
 - needsAttorney: true if the story mentions injury, an insurer, a minor, a landlord/tenant relationship, threats, criminal conduct, or anything over $2,000.
 - Dates as ISO yyyy-mm-dd.
 - Never print email addresses in the agreement; refer to each party by name ("verified by email").`;
 
-export async function draftAgreement(intake: Intake): Promise<{ agreement: Agreement; by: "claude" | "template" }> {
+export type Drafted = { agreement: Agreement; by: DraftEngine; model?: string };
+
+const userPrompt = (intake: Intake) => `Parties' own words, as JSON:\n${JSON.stringify(intake, null, 2)}`;
+
+/**
+ * The parties' own numbers always win over anything a model wrote, and the clauses always follow the
+ * certified template: a clause the model dropped or renamed is filled from the template wording.
+ */
+function pin(a: Agreement, intake: Intake): Agreement {
+  const base = templateDraft(intake);
+  const clauses = TEMPLATE.clauses.map(
+    (h) =>
+      a.clauses.find((cl) => cl.heading.trim().toLowerCase() === h.toLowerCase() && cl.body.trim()) ?? base.clauses.find((cl) => cl.heading === h)!,
+  );
+  return { ...a, clauses: clauses.map((cl, i) => ({ ...cl, heading: TEMPLATE.clauses[i] })), amountUsd: intake.amountUsd, remedy: intake.remedy };
+}
+
+/**
+ * "gmi": draft on our own model at GMI Cloud; never sent to a third-party AI (falls back to the template, not to Claude).
+ * "claude": draft with Claude.
+ */
+export async function draftAgreement(intake: Intake, where: "gmi" | "claude" = "claude"): Promise<Drafted> {
+  if (where === "gmi") {
+    const own = await draftOnGmi(SYSTEM, userPrompt(intake));
+    return own ? { agreement: pin(own.agreement, intake), by: "gmi", model: own.model } : { agreement: templateDraft(intake), by: "template" };
+  }
   if (!process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_AUTH_TOKEN) {
     return { agreement: templateDraft(intake), by: "template" };
   }
@@ -31,17 +57,12 @@ export async function draftAgreement(intake: Intake): Promise<{ agreement: Agree
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
       system: SYSTEM,
-      messages: [{ role: "user", content: `Parties' own words, as JSON:\n${JSON.stringify(intake, null, 2)}` }],
+      messages: [{ role: "user", content: userPrompt(intake) }],
     });
     if (res.stop_reason === "refusal" || !res.parsed_output) {
       return { agreement: templateDraft(intake), by: "template" };
     }
-    // The parties' own numbers always win over anything the model wrote.
-    const a = res.parsed_output;
-    return {
-      agreement: { ...a, amountUsd: intake.amountUsd, remedy: intake.remedy },
-      by: "claude",
-    };
+    return { agreement: pin(res.parsed_output, intake), by: "claude", model: "claude-opus-5-5" };
   } catch (err) {
     if (err instanceof Anthropic.APIError) {
       console.error(`[draft] Claude API ${err.status}: ${err.message}; using template`);
