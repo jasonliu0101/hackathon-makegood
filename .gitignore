@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+web/.data/
+web/.taste-skill/
+web/assets/*.webm
+.taste-skill/
