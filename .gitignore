@@ -8,5 +8,5 @@ out/
 next-env.d.ts
 web/.data/
 web/.taste-skill/
-web/assets/*.webm
+web/assets/
 .taste-skill/

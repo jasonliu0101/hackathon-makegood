@@ -1,0 +1,174 @@
+.wrap {
+  position: relative;
+  min-height: 100svh;
+  padding: clamp(48px, 7vw, 120px) var(--margin);
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  align-items: end;
+  overflow: hidden;
+}
+.stage {
+  grid-column: 6 / 13;
+  grid-row: 1;
+  position: relative;
+  height: 74vh;
+  display: grid;
+  place-items: center;
+}
+.disc {
+  position: absolute;
+  width: 58vh;
+  height: 58vh;
+  border-radius: 50%;
+  bottom: 0;
+  left: 42%;
+  transform: translateX(-50%);
+  transition: background-color 300ms linear;
+}
+.object {
+  position: absolute;
+  bottom: 5vh;
+  left: 42%;
+  transform: translateX(-50%);
+  height: 50vh;
+  width: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: 999px 999px 0 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .object {
+    animation: obj-in 300ms linear;
+  }
+}
+@keyframes obj-in {
+  from {
+    opacity: 0;
+  }
+}
+.fact {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: var(--step-body);
+  line-height: 1.4;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .fact {
+    animation: fact-in 260ms var(--ease-out);
+  }
+}
+@keyframes fact-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.place {
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+.go {
+  white-space: nowrap;
+}
+.amount {
+  display: block;
+  font-weight: 800;
+  font-size: var(--step-figure);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.list {
+  grid-column: 1 / 7;
+  grid-row: 1;
+  position: relative;
+  z-index: 1;
+}
+.heading,
+.list button {
+  font-size: var(--step-figure);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+.heading {
+  font-weight: 800;
+  color: var(--blue);
+  margin-bottom: 0.2em;
+}
+.list button {
+  background: none;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted-on-white);
+  cursor: pointer;
+  transition:
+    color var(--t-fast) linear,
+    transform var(--t-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .list button:hover {
+    transform: translateX(6px);
+  }
+}
+.list button:active {
+  transform: scale(0.98);
+}
+.list button.on {
+  color: var(--black);
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 0;
+    padding-top: 96px;
+    padding-bottom: 96px;
+  }
+  .stage {
+    display: block;
+    place-items: normal;
+    height: auto;
+    padding-top: min(90vw, 586px);
+  }
+  .disc {
+    top: 0;
+    bottom: auto;
+    left: 50%;
+    width: min(86vw, 560px);
+    height: min(86vw, 560px);
+    transform: translateX(-50%);
+  }
+  .object {
+    left: 50%;
+    top: min(4vw, 26px);
+    bottom: auto;
+    height: min(76vw, 496px);
+    transform: translateX(-50%);
+  }
+  .fact {
+    position: static;
+    max-width: none;
+    margin-top: 16px;
+    font-size: var(--step-body);
+  }
+  .list {
+    order: -1;
+    margin-bottom: 32px;
+  }
+  .heading {
+    font-size: var(--step-figure);
+  }
+  .list button {
+    font-size: var(--step-lead);
+    padding: 4px 0;
+  }
+}

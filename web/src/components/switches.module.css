@@ -1,0 +1,110 @@
+.list {
+  display: block;
+}
+.band {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  min-height: clamp(120px, 16vh, 168px);
+  padding: 28px var(--margin);
+  background: var(--black);
+  color: #8f8f8f;
+  transition:
+    background-color var(--t) linear,
+    color var(--t) linear;
+}
+.band.on {
+  background: var(--tone);
+  color: var(--black);
+}
+.band.light {
+  color: var(--white);
+}
+.sentence {
+  display: block;
+  font-weight: 800;
+  font-size: var(--step-figure);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  cursor: pointer;
+}
+.then {
+  margin-top: 10px;
+  font-size: var(--step-lead);
+  max-width: 60ch;
+  font-weight: 500;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .then:not([hidden]) {
+    animation: then-in 360ms var(--ease-out);
+  }
+}
+@keyframes then-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+/* The product's own toggle, sized to the type */
+.toggle {
+  position: relative;
+  width: clamp(64px, 6.4vw, 104px);
+  height: clamp(34px, 3.4vw, 54px);
+  border-radius: 999px;
+  border: 0;
+  background: #3a3a3a;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color var(--t) linear,
+    transform var(--t-fast) var(--ease-out);
+}
+.on .toggle {
+  background: var(--black);
+}
+.light .toggle {
+  background: var(--white);
+}
+.knob {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  border-radius: 999px;
+  background: #8f8f8f;
+  transition:
+    transform var(--t) var(--ease-out),
+    background-color var(--t) linear;
+}
+.on .knob {
+  transform: translateX(calc(100% + 0px));
+  background: var(--tone);
+}
+.light .knob {
+  background: var(--blue);
+}
+.toggle:active {
+  transform: scale(0.97);
+}
+.toggle:active .knob {
+  width: calc(58% - 4px);
+}
+
+@media (max-width: 760px) {
+  .band {
+    min-height: 132px;
+    gap: 16px;
+  }
+  .sentence {
+    font-size: var(--step-lead);
+  }
+  .then {
+    font-size: var(--step-body);
+  }
+  .toggle {
+    width: 64px;
+    height: 36px;
+  }
+}

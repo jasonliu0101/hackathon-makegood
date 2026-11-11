@@ -1,0 +1,102 @@
+.dialog {
+  background: var(--white);
+  color: var(--black);
+  border-radius: 8px;
+  padding: 12px;
+  width: 100%;
+}
+.cases {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.legend {
+  padding: 12px 12px 10px;
+  font-weight: 800;
+  font-size: var(--step-lead);
+  letter-spacing: -0.02em;
+}
+.case {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 14px 12px;
+  border-radius: 4px;
+  font-size: var(--step-lead);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    background-color var(--t-fast) linear,
+    color var(--t-fast) linear;
+}
+.case input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+@media (hover: hover) and (pointer: fine) {
+  .case:hover {
+    background: var(--paper-2);
+  }
+}
+.case:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: -3px;
+}
+.caseOn,
+.caseOn:hover {
+  background: var(--yellow) !important;
+  font-weight: 800;
+}
+.seg {
+  border: 0;
+  margin: 0 0 12px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--paper-2);
+  border-radius: 4px;
+  padding: 4px;
+}
+.seg > label {
+  position: relative;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 800;
+  transition: background-color var(--t-fast) linear;
+}
+.seg > label:hover {
+  background: #e3e5f6;
+}
+.seg input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  cursor: pointer;
+}
+.seg > label:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.segOn,
+.segOn:hover {
+  background: var(--blue) !important;
+  color: var(--white);
+}
+.submit {
+  width: 100%;
+}
+@media (max-width: 640px) {
+  .submit {
+    min-height: 52px;
+  }
+}

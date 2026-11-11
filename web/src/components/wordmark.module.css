@@ -1,0 +1,36 @@
+.mark {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 26svh;
+  min-height: 180px;
+}
+.block {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: var(--black);
+  overflow: hidden;
+  transition: transform var(--t) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .block:hover {
+    transform: translateY(-6px);
+  }
+}
+.letter {
+  font-weight: 800;
+  font-size: var(--step-display);
+  line-height: 0.78;
+  letter-spacing: -0.04em;
+}
+@media (max-width: 640px) {
+  .mark {
+    height: 18svh;
+    min-height: 120px;
+  }
+  .letter {
+    font-size: var(--step-figure);
+  }
+}
