@@ -46,7 +46,7 @@ export function photoFor(story: string): string | undefined {
   return SCENARIOS.find((x) => x.story.startsWith(head))?.img;
 }
 
-/** Initials for a person's mark: "Jason Liu" → "JL", "Liu J." → "LJ". */
+/** Initials for a person's mark: "Jack Huang" → "JH", "Liu J." → "LJ". */
 export function initials(name: string): string {
   return name
     .split(/\s+/)

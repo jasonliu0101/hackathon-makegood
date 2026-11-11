@@ -64,18 +64,18 @@ function Fragment({ stage }: { stage: number }) {
       <div data-ui className={s.ui}>
         <p className={s.uiTitle}>Settlement of damage claim</p>
         <p className={s.uiClause}>
-          <b>What will be done.</b> Jason Liu will pay Liu Jason $180.00 no later than November 25, 2026.
+          <b>What will be done.</b> Jack Huang will pay Jason Liu $180.00 no later than November 25, 2026.
         </p>
         <p className={s.uiClause}>
           <b>Release.</b> When the money is released, each party gives up any claim about this incident only.
         </p>
         <div className={s.uiSigs}>
           <span>
-            <i>Jason Liu</i>
+            <i>Jack Huang</i>
             Signed Nov 11, 9:42 pm
           </span>
           <span>
-            <i>Liu Jason</i>
+            <i>Jason Liu</i>
             Signed Nov 11, 9:57 pm
           </span>
         </div>
@@ -85,14 +85,14 @@ function Fragment({ stage }: { stage: number }) {
     <div data-ui className={s.ui}>
       <p className={s.uiTitle}>Payment hold</p>
       <p className={`${s.uiBig} tnum`}>$180.00</p>
-      <p className={s.uiStatus}>Held for Liu Jason</p>
+      <p className={s.uiStatus}>Held for Jason Liu</p>
       <div className={s.uiRow}>
         <span className={s.uiLabel}>Paid in</span>
         <span className="tnum">Nov 11, 10:03 pm</span>
       </div>
       <div className={s.uiRow}>
         <span className={s.uiLabel}>Releases</span>
-        <span className="tnum">when Liu confirms, or Dec 2</span>
+        <span className="tnum">when Jason confirms, or Dec 2</span>
       </div>
       <span className={s.uiButton}>Confirm it’s made good</span>
     </div>

@@ -135,11 +135,11 @@ export const AUTO_RELEASE_DAYS = 7;
 /** Sample people for each scenario, so a picked scenario is a complete case. Replace with real parties in production. */
 export type SampleParties = { responsibleName: string; responsibleEmail: string; affectedName: string; affectedEmail: string };
 export const SAMPLE_PARTIES: Record<string, SampleParties> = {
-  "scooter-scrape": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
-  mirror: { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
-  "tipped-over": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
-  "plant-pot": { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
-  fence: { responsibleName: "Jason Liu", responsibleEmail: "jason.liu@example.com", affectedName: "Liu Jason", affectedEmail: "liu.jason@example.com" },
+  "scooter-scrape": { responsibleName: "Jack Huang", responsibleEmail: "jack.huang@example.com", affectedName: "Jason Liu", affectedEmail: "jason.liu@example.com" },
+  mirror: { responsibleName: "Jack Huang", responsibleEmail: "jack.huang@example.com", affectedName: "Jason Liu", affectedEmail: "jason.liu@example.com" },
+  "tipped-over": { responsibleName: "Jack Huang", responsibleEmail: "jack.huang@example.com", affectedName: "Jason Liu", affectedEmail: "jason.liu@example.com" },
+  "plant-pot": { responsibleName: "Jack Huang", responsibleEmail: "jack.huang@example.com", affectedName: "Jason Liu", affectedEmail: "jason.liu@example.com" },
+  fence: { responsibleName: "Jack Huang", responsibleEmail: "jack.huang@example.com", affectedName: "Jason Liu", affectedEmail: "jason.liu@example.com" },
 };
 
 /**

@@ -1,0 +1,7 @@
+assets
+.data
+.taste-skill
+.next
+node_modules
+.env*
+!.env.example
