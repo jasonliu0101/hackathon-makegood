@@ -1,0 +1,473 @@
+/* /start: scenario picker first, then the form it fills. */
+.title {
+  margin-bottom: 20px;
+}
+
+/* ── Scenario picker ─────────────────────────────────────────── */
+.picker {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin: 0 0 28px;
+  min-width: 0;
+}
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--white);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 0 var(--blue);
+  transition:
+    transform var(--t-fast) var(--ease-out),
+    opacity var(--t) var(--ease-out),
+    box-shadow var(--t-fast) var(--ease-out);
+}
+.tile input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.tile:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.tile:active {
+  transform: scale(0.97);
+}
+.tilePic {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #dcdff2;
+}
+.tilePic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 600ms var(--ease-out);
+}
+.tileBlank {
+  display: grid;
+  place-items: center;
+  background: var(--paper-2);
+  box-shadow: inset 0 0 0 2px #d4d6e8;
+}
+.plus {
+  position: relative;
+  width: 36px;
+  height: 36px;
+}
+.plus::before,
+.plus::after {
+  content: "";
+  position: absolute;
+  background: var(--blue);
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+}
+.plus::before {
+  width: 100%;
+  height: 4px;
+}
+.plus::after {
+  width: 4px;
+  height: 100%;
+}
+.tileText {
+  display: flex;
+  padding: 10px 12px 12px;
+  flex: 1;
+  transition:
+    background-color var(--t-fast) linear,
+    color var(--t-fast) linear;
+}
+.tileName {
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.tilePic {
+  position: relative;
+}
+.tileAmt {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--black);
+  color: var(--white);
+  font-weight: 800;
+  font-size: var(--step-small);
+  transition: background-color var(--t-fast) linear, color var(--t-fast) linear;
+}
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover .tilePic img {
+    transform: scale(1.05);
+  }
+  .tile:hover .tileText {
+    background: #e6e8fb;
+  }
+}
+/* Once one is chosen, the rest step back. */
+.picker[data-picked] .tile:not([data-on]) {
+  opacity: 0.5;
+}
+.picker[data-picked] .tile:not([data-on]):hover {
+  opacity: 0.85;
+}
+.tile[data-on] {
+  box-shadow: inset 0 0 0 4px var(--blue);
+}
+.tile[data-on] .tileText,
+.tile[data-on]:hover .tileText {
+  background: var(--blue);
+  color: var(--white);
+}
+.tile[data-on] .tileAmt {
+  background: var(--yellow);
+  color: var(--black);
+}
+
+/* ── The form ───────────────────────────────────────────────── */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 24px;
+  align-items: start;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .layout {
+    animation: rise 320ms var(--ease-out) both;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+.block {
+  margin-bottom: 16px;
+}
+.blockHead {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.blockHead .seg {
+  margin: 0;
+}
+.blockHead :global(h2) {
+  margin: 0;
+}
+.grid21 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+.seg {
+  border: 0;
+  padding: 0;
+  margin: 0 0 18px;
+  min-width: 0;
+}
+.segRow,
+.segRow3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  background: var(--paper-2);
+  border-radius: 4px;
+  padding: 4px;
+}
+.segRow3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.segRow > label,
+.segRow3 > label {
+  position: relative;
+  text-align: center;
+  padding: 9px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    background-color var(--t-fast) linear,
+    color var(--t-fast) linear,
+    transform var(--t-fast) var(--ease-out);
+}
+.segRow > label:active,
+.segRow3 > label:active {
+  transform: scale(0.97);
+}
+.segRow > label:hover,
+.segRow3 > label:hover {
+  background: #e3e5f6;
+}
+.segRow input,
+.segRow3 input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.segRow > label:has(input:focus-visible),
+.segRow3 > label:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.segOn,
+.segOn:hover {
+  background: var(--blue) !important;
+  color: var(--white);
+}
+.money {
+  position: relative;
+}
+.money > span {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  translate: 0 -50%;
+  font-weight: 800;
+  pointer-events: none;
+}
+.money input {
+  padding-left: 30px;
+  font-weight: 800;
+}
+.fieldErr {
+  margin-top: 6px;
+  font-size: var(--step-small);
+  font-weight: 500;
+  color: #8a2a10;
+}
+.person {
+  display: grid;
+  gap: 8px;
+}
+.who {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+.you {
+  padding: 0 8px;
+  border-radius: 3px;
+  background: var(--yellow);
+  font-size: var(--step-small);
+  font-weight: 500;
+}
+.checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.checks label {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 4px;
+  background: var(--paper-2);
+  cursor: pointer;
+  font-weight: 500;
+  transition:
+    background-color var(--t-fast) linear,
+    color var(--t-fast) linear,
+    transform var(--t-fast) var(--ease-out);
+}
+.checks label:hover {
+  background: #e3e5f6;
+}
+.checks label:active {
+  transform: scale(0.97);
+}
+.checks input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.checks label:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.checks .chipOn,
+.checks .chipOn:hover {
+  background: #ffe2d9;
+  color: #8a2a10;
+  box-shadow: inset 0 0 0 2px #8a2a10;
+}
+
+/* ── Summary: the agreement in one glance, and the one button ── */
+.side {
+  position: sticky;
+  top: 24px;
+}
+.summary {
+  background: var(--blue);
+  color: var(--white);
+  transition: background-color var(--t) linear;
+}
+.summary[data-outside] {
+  background: var(--black);
+}
+.sumAmt {
+  font-weight: 800;
+  font-size: 2.5rem;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+.sumWhat {
+  margin: 6px 0 18px;
+  color: var(--muted-on-blue);
+  font-weight: 500;
+}
+.summary[data-outside] .sumWhat {
+  color: #a6a6a6;
+}
+.sumList > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+.sumList dt {
+  color: var(--muted-on-blue);
+}
+.summary[data-outside] .sumList dt {
+  color: #a6a6a6;
+}
+.sumList dd {
+  font-weight: 500;
+  text-align: right;
+}
+.refer {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 4px;
+  background: #ffe2d9;
+  color: #8a2a10;
+  font-weight: 500;
+}
+.submit {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 18px;
+}
+.summary[data-outside] .submit {
+  background: var(--white);
+  color: var(--black);
+}
+.busy::after {
+  content: "";
+  display: inline-block;
+  width: 1.2em;
+  text-align: left;
+  animation: dots 1s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% {
+    content: "";
+  }
+  25% {
+    content: ".";
+  }
+  50% {
+    content: "..";
+  }
+  75% {
+    content: "...";
+  }
+}
+
+@media (max-width: 1100px) {
+  .picker {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .side {
+    position: static;
+  }
+}
+@media (max-width: 560px) {
+  .picker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .grid21 {
+    grid-template-columns: 1fr;
+  }
+  .segRow > label {
+    padding: 9px 8px;
+  }
+}
+
+/* Which model writes the draft: our own on GMI Cloud, or Claude */
+.engine {
+  border: 0;
+  padding: 0;
+  margin: 18px 0 0;
+  min-width: 0;
+}
+.engine legend {
+  padding: 0;
+  margin-bottom: 8px;
+  color: var(--muted-on-blue);
+}
+.engine > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+.engine label {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 9px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+.engine label:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.engine label[data-on] {
+  background: #fff;
+  color: var(--ink);
+}
+.engine label span {
+  font-size: var(--step-small);
+  opacity: 0.72;
+}
+.engine input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.engine label:has(input:focus-visible) {
+  outline: 3px solid var(--yellow);
+  outline-offset: 2px;
+}

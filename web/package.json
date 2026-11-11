@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "reset:demo": "node scripts/reset-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.8.0",

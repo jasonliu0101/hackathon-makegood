@@ -5,23 +5,49 @@ import { scenarioById } from "./scenarios";
 import { REVIEWER, REVIEW_CHECKLIST, SAMPLE_PARTIES, feeFor, type CaseFile, type Intake } from "./types";
 
 /**
- * Hackathon persistence: one JSON file on disk, cached in memory.
+ * Persistence. On Vercel: Upstash Redis over its REST API (one hash, a field per case), so every
+ * serverless instance sees the same cases. Locally, with no Redis configured: one JSON file on disk.
  * Swap for a real database before anyone's money depends on it.
  */
+const KEY = "mg:cases";
+const SEEDED = "mg:seeded";
+
+const redisUrl = () => (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL)?.trim().replace(/\/$/, "");
+const redisToken = () => (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN)?.trim();
+const onRedis = () => !!(redisUrl() && redisToken());
+
+async function redis<T>(...command: (string | number)[]): Promise<T> {
+  const res = await fetch(redisUrl()!, {
+    method: "POST",
+    headers: { authorization: `Bearer ${redisToken()}`, "content-type": "application/json" },
+    body: JSON.stringify(command),
+    cache: "no-store",
+  });
+  const data = (await res.json()) as { result?: T; error?: string };
+  if (!res.ok || data.error) throw new Error(`Upstash ${command[0]}: ${data.error ?? res.status}`);
+  return data.result as T;
+}
+
+/** Seed the demo queue once per database. */
+async function ensureSeeded() {
+  if ((await redis<string | null>("SET", SEEDED, "1", "NX")) !== "OK") return;
+  for (const c of seedCases()) await redis("HSETNX", KEY, c.id, JSON.stringify(c));
+}
+
 const FILE = path.join(process.cwd(), ".data", "cases.json");
 
 type Db = { cases: Record<string, CaseFile> };
-const g = globalThis as unknown as { __makegoodDbV5?: Db };
+const g = globalThis as unknown as { __makegoodDbV6?: Db };
 
 async function load(): Promise<Db> {
-  if (g.__makegoodDbV5) return g.__makegoodDbV5;
+  if (g.__makegoodDbV6) return g.__makegoodDbV6;
   try {
-    g.__makegoodDbV5 = JSON.parse(await fs.readFile(FILE, "utf8")) as Db;
+    g.__makegoodDbV6 = JSON.parse(await fs.readFile(FILE, "utf8")) as Db;
   } catch {
-    g.__makegoodDbV5 = { cases: {} };
-    for (const c of seedCases()) g.__makegoodDbV5.cases[c.id] = c;
+    g.__makegoodDbV6 = { cases: {} };
+    for (const c of seedCases()) g.__makegoodDbV6.cases[c.id] = c;
   }
-  return g.__makegoodDbV5;
+  return g.__makegoodDbV6;
 }
 
 async function save(db: Db) {
@@ -30,15 +56,30 @@ async function save(db: Db) {
 }
 
 export async function listCases(): Promise<CaseFile[]> {
-  const db = await load();
-  return Object.values(db.cases).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  let all: CaseFile[];
+  if (onRedis()) {
+    await ensureSeeded();
+    all = (await redis<string[]>("HVALS", KEY)).map((v) => JSON.parse(v) as CaseFile);
+  } else {
+    all = Object.values((await load()).cases);
+  }
+  return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export async function getCase(id: string): Promise<CaseFile | undefined> {
+  if (onRedis()) {
+    await ensureSeeded();
+    const v = await redis<string | null>("HGET", KEY, id);
+    return v ? (JSON.parse(v) as CaseFile) : undefined;
+  }
   return (await load()).cases[id];
 }
 
 export async function putCase(c: CaseFile): Promise<CaseFile> {
+  if (onRedis()) {
+    await redis("HSET", KEY, c.id, JSON.stringify(c));
+    return c;
+  }
   const db = await load();
   db.cases[c.id] = c;
   await save(db);
@@ -55,7 +96,7 @@ export function newId(): string {
 const MIN = 60_000;
 const day = (daysFromNow: number) => new Date(Date.now() + daysFromNow * 864e5).toISOString().slice(0, 10);
 
-/** Seed queue: Taipei scooter-parking cases. Runs only when .data/cases.json does not exist. */
+/** Seed queue: Taipei scooter-parking cases. Runs once per database (no .data/cases.json, or a fresh Redis). */
 const SEEDS: { id: string; scenario: string; minsAgo: number; done?: boolean }[] = [
   { id: "MG-Q8M4ZT", scenario: "tipped-over", minsAgo: 26 },
   { id: "MG-3HD9WA", scenario: "mirror", minsAgo: 74 },
